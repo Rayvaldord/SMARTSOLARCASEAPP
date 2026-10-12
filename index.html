@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSolarCase App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="phone-container">
+    <div class="camera-hole"></div> 
+    
+    <div class="app-header">
+        <div class="brand">
+            <i class="fas fa-hexagon-nodes"></i>
+            <h2>SMARTSOLARCASE</h2>
+        </div>
+        <span id="connection-status" class="connected"><i class="fab fa-bluetooth-b"></i> Linked</span>
+    </div>
+
+    <div class="app-content">
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-pane active">
+            
+            <!-- PANEL 1: ANIMASI MEMANEN SURYA -->
+            <div class="live-harvesting glowing-panel" id="harvest-panel">
+                <div class="harvest-header">
+                    <span class="pulse-dot dot-memanen" id="harvest-dot"></span> 
+                    <span id="harvest-status-text">Harvesting</span>
+                </div>
+                <div class="harvest-value" id="watt-display">3.45 <span class="unit">W</span></div>
+                
+                <!-- Animasi Garis Mengalir (Khusus Matahari ke Casing) -->
+                <div class="harvest-bar-container">
+                    <div class="harvest-bar animated-flow" id="solar-flow-bar"></div>
+                </div>
+            </div>
+
+            <!-- KARTU BATERAI & DIAGRAM PIE -->
+            <div class="battery-section">
+                <div class="battery-card glass-panel">
+                    <div class="card-title"><i class="fas fa-layer-group"></i> Casing</div>
+                    <div class="circular-progress" id="case-circ" style="--progress: 82%;">
+                        <div class="inner-circle" id="case-pct">82%</div>
+                    </div>
+                    <div class="sub-info">Cap: 12.000mAh</div>
+                </div>
+                <div class="battery-card glass-panel">
+                    <div class="card-title"><i class="fas fa-mobile-alt"></i> Smartphone</div>
+                    <div class="circular-progress phone-prog" id="hp-circ" style="--progress: 45%;">
+                        <div class="inner-circle" id="hp-pct">45%</div>
+                    </div>
+                    <div class="sub-info">Health: 94%</div>
+                </div>
+            </div>
+
+            <!-- PANEL 2: ANIMASI CHARGING KE HP -->
+            <div class="charging-transfer glass-panel">
+                <div class="card-title" style="justify-content: space-between; margin-bottom: 8px;">
+                    <span><i class="fas fa-plug-circle-bolt"></i> Charging </span>
+                    <span id="transfer-status" class="text-eco">Eco Mode</span>
+                </div>
+                <div class="transfer-bar-container">
+                    <div class="transfer-bar flow-eco" id="charge-flow-bar"></div>
+                </div>
+            </div>
+
+            <div class="power-modes glass-panel">
+                <div class="card-title mb-2"><i class="fas fa-bolt"></i> Distribusi Daya</div>
+                <div class="mode-buttons">
+                    <button class="mode-btn" id="mode-standby" onclick="setMode('standby')"><i class="fas fa-pause"></i> Standby</button>
+                    <button class="mode-btn active" id="mode-eco" onclick="setMode('eco')"><i class="fas fa-leaf"></i> Eco</button>
+                    <button class="mode-btn" id="mode-boost" onclick="setMode('boost')"><i class="fas fa-rocket"></i> Boost</button>
+                    <button class="mode-btn" id="mode-bypass" onclick="setMode('bypass')"><i class="fas fa-forward"></i> Bypass</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SUHU -->
+        <div id="tab-thermal" class="tab-pane">
+            <h3 class="tab-top-title"><i class="fas fa-temperature-half"></i> AI Thermal Management</h3>
+            
+            <div class="thermal-status safe glass-panel" id="safety-indicator">
+                <i class="fas fa-shield-check fa-2x status-icon"></i>
+                <div class="status-text">
+                    <h4 id="thermal-h4">Suhu Normal</h4>
+                    <p id="thermal-p">AI Auto Cut-off Standby</p>
+                </div>
+            </div>
+
+            <div class="temp-gauges">
+                <div class="gauge-card glass-panel">
+                    <div class="card-title">Casing</div>
+                    <div class="temp-value" id="case-temp">35<span class="unit">°C</span></div>
+                    <div class="temp-bar-container">
+                        <div class="temp-bar-fill" id="case-fill" style="width: 58%;"></div>
+                    </div>
+                </div>
+                <div class="gauge-card glass-panel">
+                    <div class="card-title">Smartphone</div>
+                    <div class="temp-value" id="phone-temp">31<span class="unit">°C</span></div>
+                    <div class="temp-bar-container">
+                        <div class="temp-bar-fill phone-fill" id="hp-fill" style="width: 51%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="control-panel glass-panel border-glow">
+                <div class="slider-header">
+                    <span>Limit/Batas Suhu Smartphone</span>
+                    <span id="limit-val" class="highlight-text">45°C</span>
+                </div>
+                <input type="range" id="temp-limit" class="cyber-slider" min="30" max="55" value="45">
+                <div class="sub-info mt-1">(Auto Cut-Off) bekerja jika suhu <b>Smartphone</b> melebihi batas.</div>
+            </div>
+        </div>
+
+        <!-- TAB 3: CUACA -->
+        <div id="tab-predictor" class="tab-pane">
+            <h3 class="tab-top-title"><i class="fas fa-cloud-sun"></i> AI Weather Predictor</h3>
+            
+            <div class="weather-insight glass-panel glowing-panel">
+                <div class="weather-main-now">
+                    <div class="temp-now">32°C</div>
+                    <div class="weather-condition-now">
+                        <i class="fas fa-cloud-sun fa-2x text-warning"></i>
+                        <span>Cerah Berawan</span>
+                    </div>
+                </div>
+                
+                <div class="hourly-forecast">
+                    <div class="forecast-item"><span>Sekarang</span><i class="fas fa-cloud-sun text-warning"></i><span>32°C</span></div>
+                    <div class="forecast-item"><span>13:00</span><i class="fas fa-sun text-warning"></i><span>34°C</span></div>
+                    <div class="forecast-item"><span>14:00</span><i class="fas fa-sun text-warning"></i><span>35°C</span></div>
+                    <div class="forecast-item"><span>15:00</span><i class="fas fa-cloud"></i><span>31°C</span></div>
+                    <div class="forecast-item"><span>16:00</span><i class="fas fa-cloud-showers-heavy text-muted"></i><span>28°C</span></div>
+                </div>
+
+                <p class="recommendation mt-2">Predictor: Jemur sekarang sebelum jam 16:00 (Est. Penuh 1j 45m sebelum 16:00)</p>
+            </div>
+
+            <div class="alignment-card glass-panel">
+                <div class="card-title"><i class="fas fa-compass"></i> Efisiensi Sudut Jemur</div>
+                <div class="alignment-visual">
+                    <div class="target-circle"></div>
+                    <div class="current-angle animated-tilt"></div>
+                </div>
+                <div class="alignment-status">Efisiensi Gyro: <span id="angle-status" class="highlight-text">Sempurna (100%)</span></div>
+                    <div class="sub-info mt-1"> Pastikan sudut kemiringan smartphone dan casing sama sebelum casing dilepas.</div>
+            </div>
+        </div>
+
+        <!-- TAB 4: PANDUAN -->
+        <div id="tab-info" class="tab-pane">
+            <h3 class="tab-top-title"><i class="fas fa-book-open"></i> Guide Book</h3>
+            
+            <details class="info-card glass-panel" open>
+                <summary>Tab Dashboard</summary>
+                <div class="info-content">
+                    <details class="nested-card">
+                        <summary>Cara Memasang Casing</summary>
+                        <div class="nested-content">Tarik bagian atas casing adjustable, geser/slide smartphone dari atas casing ke bawah, hingga port USB-C smartphone masuk ke konektor USB-C pada casing.</div>
+                    </details>
+                    <details class="nested-card">
+                        <summary>Penjelasan Mode Distribusi Daya</summary>
+                        <div class="nested-content">
+                            <ol>
+                                <li><b>Standby:</b> Arus listrik tidak dialirkan ke smartphone.</li>
+                                <li><b>Eco:</b> Arus mengalir lambat, suhu lebih stabil.</li>
+                                <li><b>Boost:</b> Arus mengalir cepat, suhu lebih tinggi.</li>
+                                <li><b>Bypass:</b> Saat dijemur, daya matahari langsung mengalir ke smartphone.</li>
+                            </ol>
+                        </div>
+                    </details>
+                </div>
+            </details>
+
+            <details class="info-card glass-panel">
+                <summary>Tab Suhu</summary>
+                <div class="info-content">
+                    <details class="nested-card">
+                        <summary>Cara Kerja AI Auto Cut-Off</summary>
+                        <div class="nested-content">Ketika suhu smartphone melebihi limit suhu, maka aliran listrik ke smartphone langsung diputus.</div>
+                    </details>
+                    <details class="nested-card">
+                        <summary>Mengatur Limit Suhu</summary>
+                        <div class="nested-content">Limit suhu smartphone bisa diatur menggunakan slider sesuai dengan preferensi anda. (Resiko overheating jika suhu diatur terlalu tinggi!)</div>
+                    </details>
+                </div>
+            </details>
+            
+            <details class="info-card glass-panel">
+                <summary>Panduan Tab Cuaca</summary>
+                <div class="info-content">
+                    <details class="nested-card">
+                        <summary>Membaca Prediksi Cuaca</summary>
+                        <div class="nested-content">AI Weather Predictor akan memberikan rekomendasi kapan anda bisa menjemur panel di waktu dan cuaca paling efisien.</div>
+                    </details>
+                    <details class="nested-card">
+                        <summary>Kalibrasi Efisiensi Sudut Jemur</summary>
+                        <div class="nested-content">Dengan memanfaatkan sensor gyroscope pada smartphone, samakan kemiringan smartphone dan casing sebelum dilepas saat ingin menjemur, untuk mendapatkan sinar matahari paling efisien</div>
+                    </details>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <!-- Navigasi Bawah -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('dashboard', this)">
+            <i class="fas fa-chart-pie"></i><span>Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('thermal', this)">
+            <i class="fas fa-temperature-half"></i><span>Suhu</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('predictor', this)">
+            <i class="fas fa-cloud-sun"></i><span>Cuaca</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('info', this)">
+            <i class="fas fa-circle-info"></i><span>Panduan</span>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
